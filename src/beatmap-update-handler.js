@@ -251,6 +251,16 @@ polka()
         params.push(new Date(req.query.to).toISOString().slice(0, 19).replace('T', ' '));
     }
 
+    if(req.query.length_min){
+        filter += ` AND total_length >= ?`;
+        params.push(req.query.length_min);
+    }
+
+    if(req.query.length_max){
+        filter += ` AND total_length <= ?`;
+        params.push(req.query.length_max);
+    }
+
     if(req.query.star_rating){
         let star_range = req.query.star_rating.split("-");
 
@@ -319,6 +329,10 @@ polka()
         },
     };
 
+    send(res, 200, response);
+})
+.get('/amount', async (req, res) => {
+    let response = await runSql('SELECT count(*) AS "loved+ranked" FROM beatmap WHERE mode=0 and (approved between 1 and 2 or approved=4)'); 
     send(res, 200, response);
 })
 .listen(config.HTTP_PORT || 16791, err => {
