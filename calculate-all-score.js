@@ -6,7 +6,7 @@ const credentials = require('./config.json');
 
 const connection = mysql.createConnection(credentials.MYSQL);
 
-const query = connection.query('SELECT beatmap_id FROM beatmap WHERE mode = 0 AND eyup_star_rating IS NULL');
+const query = connection.query('SELECT beatmap_id FROM beatmap WHERE mode = 0 AND (eyup_star_rating IS NULL OR max_score IS NULL or max_score_fullmod IS NULL)');
 //const query = connection.query('SELECT beatmap_id FROM beatmap WHERE mode = 0');
 
 query

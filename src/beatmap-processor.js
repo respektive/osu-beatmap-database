@@ -62,6 +62,7 @@ async function prepareBeatmap(){
     beatmap.DifficultyPoints = beatmap.cs + beatmap.od + beatmap.hp;    
       
     const score = beatmap.maxScore;
+    const score_fullmod = beatmap.getMaxScore(1112);
     const eyupStars = calculateEyupStars();
 
     const tags = new Set();
@@ -79,7 +80,7 @@ async function prepareBeatmap(){
         beatmapObj[0].tags.split(' ').forEach(item => tags.add(item));
     }
     
-    await runSql('UPDATE beatmap SET max_score = ?, eyup_star_rating = ?, tags = ? WHERE beatmap_id = ?', [score, eyupStars, [...tags].join(' '), beatmap_id]);
+    await runSql('UPDATE beatmap SET max_score = ?, max_score_fullmod = ?, eyup_star_rating = ?, tags = ? WHERE beatmap_id = ?', [score, score_fullmod, eyupStars, [...tags].join(' '), beatmap_id]);
 }
 
 process.on('message', obj => {
