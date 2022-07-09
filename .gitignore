@@ -2,3 +2,4 @@ node_modules
 files
 config.json
 error.log
+package-lock.json
