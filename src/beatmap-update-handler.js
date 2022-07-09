@@ -124,7 +124,7 @@ async function upsertBeatmap(b, diffcalc = false) {
 
         console.log(b.beatmap_id, 'downloaded & calculated');
     } else {
-        // console.log(b.beatmap_id, 'exists');
+        console.log(b.beatmap_id, 'exists');
     }
 }
 
@@ -253,12 +253,12 @@ polka()
             params.push(new Date(req.query.to).toISOString().slice(0, 19).replace('T', ' '));
         }
 
-        if (req.query.length_min) {
+        if(req.query.length_min){
             filter += ` AND total_length >= ?`;
             params.push(req.query.length_min);
         }
-
-        if (req.query.length_max) {
+    
+        if(req.query.length_max){
             filter += ` AND total_length <= ?`;
             params.push(req.query.length_max);
         }
@@ -333,116 +333,9 @@ polka()
 
         send(res, 200, response);
     })
-    .get('/beatmaps/advanced', async (req, res) => {
-        let request;
-        let checks = 0;
-
-        try {
-            request = JSON.parse(req.query.json);
-        } catch (e) {
-            send(res, 400, { error: `${e}` });
-            return;
-        }
-
-        let query = `SELECT * FROM beatmap WHERE file_md5 IS NOT NULL`;
-
-        if (request.beatmap_id != undefined) {
-            if (/^\d+$/gm.test(request.beatmap_id)) {
-                query += (` AND beatmap_id=${request.beatmap_id}`);
-            } else {
-                checks++;
-            }
-        }
-
-        if (request.beatmapset_id != undefined) {
-            if (/^\d+$/gm.test(request.beatmapset_id)) {
-                query += (` AND beatmapset_id=${request.beatmapset_id}`);
-            } else {
-                checks++;
-            }
-        }
-
-        if (request.approved != undefined) {
-            if (/^[=,<,>][0-4]$/gm.test(request.approved)) {
-                query += (` AND approved ${request.approved}`);
-            } else {
-                checks++;
-            }
-        }
-
-        if (request.mode != undefined) {
-            if (/^[=,<,>][0-3]$/gm.test(request.mode)) {
-                query += (` AND mode ${request.mode}`);
-            } else {
-                checks++;
-            }
-        }
-
-        if (request.total_length != undefined) {
-            if (/^[=,<,>]\d+$/gm.test(request.total_length)) {
-                query += (` AND total_length ${request.total_length}`);
-            } else {
-                checks++;
-            }
-        }
-
-        if (request.hit_length != undefined) {
-            if (/^[=,<,>]\d+$/gm.test(request.hit_length)) {
-                query += (` AND hit_length ${request.hit_length}`);
-            } else {
-                checks++;
-            }
-        }
-
-        if (request.difficulty != undefined) {
-            query += (` AND version LIKE ${mysql.escape(String(request.difficulty))}`);
-        }
-
-        if (request.artist != undefined) {
-            query += (` AND artist LIKE ${mysql.escape(String(request.artist))}`);
-        }
-
-        if (request.title != undefined) {
-            query += (` AND title LIKE ${mysql.escape(String(request.title))}`);
-        }
-
-        if (request.creator != undefined) {
-            query += (` AND creator LIKE ${mysql.escape(String(request.creator))}`);
-        }
-
-        if (request.creator_id != undefined) {
-            if (/^[=,<,>]\d+$/gm.test(request.creator_id)) {
-                query += (` AND creator_id ${request.creator_id}`);
-            } else {
-                checks++;
-            }
-        }
-
-        if (request.star_rating != undefined) {
-            if (/^[=,<,>]\d+$/gm.test(request.star_rating)) {
-                query += (` AND star_rating ${request.star_rating}`);
-            } else {
-                checks++;
-            }
-        }
-
-        if (request.max_score != undefined) {
-            if (/^[=,<,>]\d+$/gm.test(request.max_score)) {
-                query += (` AND max_score ${request.max_score}`);
-            } else {
-                checks++;
-            }
-        }
-
-        let result = await runSql(query)
-            .catch(e => {
-                send(res, 400, { error: `${e}` });
-            });;
-
-        const response = { maps: result.map(a => a.beatmap_id), checksFailed: checks };
+    .get('/amount', async (req, res) => {
+        let response = await runSql('SELECT count(*) AS "loved+ranked" FROM beatmap WHERE mode=0 and (approved between 1 and 2 or approved=4)'); 
         send(res, 200, response);
-        return;
-
     })
     .listen(config.HTTP_PORT || 16791, err => {
         if (err) throw err;
