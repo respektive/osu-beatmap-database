@@ -58,7 +58,7 @@ async function updateBeatmap(beatmap_id) {
 }
 
 async function updateAllBeatmaps() {
-    const result = await runSql('SELECT beatmap_id FROM beatmap WHERE approved > 0')
+    const result = await runSql('SELECT beatmap_id FROM beatmap')
 
     for (const row of result) {
         await updateBeatmap(row.beatmap_id)
